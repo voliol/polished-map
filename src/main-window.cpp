@@ -178,13 +178,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Map List Sidebar
 	// TODO: If we're adding new sidebars/windows, having them be (un)dockable would be preferred.
 	// TODO: Better resizing behavior.
-	int LIST_SIDEBAR_WIDTH = 200;
+	int LIST_SIDEBAR_WIDTH = 300;
 	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
 	int lsw = LIST_SIDEBAR_WIDTH;
-	_map_list_scroll = new OS_Scroll(lsx, wy, lsw, wh); 
-	ww -= _map_list_scroll->w();
-	_map_list_scroll->type(Fl_Scroll::VERTICAL_ALWAYS);
-	_map_list_tree = new Fl_Tree(wx, wy, lsw, wh);
+	_map_list_tree = new Fl_Tree(lsx, wy, lsw, wh);
+	ww -= _map_list_tree->w();
 	_map_list_tree->end();
 	begin();
 
@@ -742,7 +740,7 @@ Main_Window::~Main_Window() {
 	delete _menu_bar; // includes menu items
 	delete _toolbar; // includes toolbar buttons
 	delete _metatile_sidebar; // includes metatiles
-	delete _map_list_scroll; // includes map list
+	delete _map_list_tree; // includes map list
 	delete _status_bar; // includes status bar fields
 	delete _map_scroll; // includes map and blocks
 	delete _dnd_receiver;
@@ -1418,8 +1416,10 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 
 	// populate map list sidebar
 	if (filename) {
-		_map_list_scroll->scroll_to(0, 0);
 		_map_list_tree->clear();
+		_map_list_tree->showroot(false);
+		_map_list_tree->widgetmarginleft(0);
+		_map_list_tree->connectorstyle(Fl_Tree_Connector::FL_TREE_CONNECTOR_NONE);
 		
 		char map_constants[FL_PATH_MAX] = {};
 		Config::map_constants_path(map_constants, directory);
