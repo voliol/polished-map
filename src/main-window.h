@@ -41,7 +41,7 @@ private:
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
 	Workspace *_metatile_sidebar, *_map_scroll;
-	OS_Scroll *_map_list_sidebar;
+	OS_Scroll *_map_list_scroll;
 	Toolbar *_status_bar;
 	Fl_Group *_map_group;
 	Fl_Tree *_map_list_tree;

@@ -176,14 +176,15 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	begin();
 
 	// Map List Sidebar
-	// TODO: if we're adding new sidebars/windows, having them be (un)dockable would be prefered.
+	// TODO: If we're adding new sidebars/windows, having them be (un)dockable would be preferred.
+	// TODO: Better resizing behavior.
 	int LIST_SIDEBAR_WIDTH = 200;
 	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
 	int lsw = LIST_SIDEBAR_WIDTH;
-	_map_list_sidebar = new OS_Scroll(lsx, wy, lsw, wh); 
-	ww -= _map_list_sidebar->w();
-	_map_list_sidebar->type(Fl_Scroll::VERTICAL);
-	_map_list_tree = new Fl_Tree(wx, wy, 0, 0);
+	_map_list_scroll = new OS_Scroll(lsx, wy, lsw, wh); 
+	ww -= _map_list_scroll->w();
+	_map_list_scroll->type(Fl_Scroll::VERTICAL_ALWAYS);
+	_map_list_tree = new Fl_Tree(wx, wy, lsw, wh);
 	_map_list_tree->end();
 	begin();
 
@@ -741,6 +742,7 @@ Main_Window::~Main_Window() {
 	delete _menu_bar; // includes menu items
 	delete _toolbar; // includes toolbar buttons
 	delete _metatile_sidebar; // includes metatiles
+	delete _map_list_scroll; // includes map list
 	delete _status_bar; // includes status bar fields
 	delete _map_scroll; // includes map and blocks
 	delete _dnd_receiver;
@@ -1413,6 +1415,43 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	_block_window->tileset(&tileset);
 	_tileset_window->tileset(&tileset);
 	_roof_window->tileset(&tileset);
+
+	// populate map list sidebar
+	if (filename) {
+		_map_list_scroll->scroll_to(0, 0);
+		_map_list_tree->clear();
+		
+		char map_constants[FL_PATH_MAX] = {};
+		Config::map_constants_path(map_constants, directory);
+
+		std::ifstream ifs;
+		open_ifstream(ifs, map_constants);
+		if (!ifs.good()) { 
+			// TODO: better error handling
+			fl_alert("Could not open map constants file: %s", map_constants);
+		}
+		
+		std::string groupname;
+		while (ifs.good()) {
+			std::string line;
+			std::getline(ifs, line);
+			std::istringstream lss(line);
+
+			std::string macro;
+			if (!leading_macro(lss, macro)) { continue; }
+
+			if (macro == "newgroup") {
+				lss >> groupname;
+			} else if (macro == "map_const"   // "map_const": pokecrystal
+				       || macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
+			           || macro == "mapconst" // "mapconst": pokered
+					   ) {
+				std::string mapname;
+				lss >> mapname;
+				_map_list_tree->add((groupname + "/" + mapname).c_str());
+			}
+		}
+	}
 
 	// load default palettes
 	Config::bg_tiles_pal_path(buffer, directory);
