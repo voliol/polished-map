@@ -8,6 +8,7 @@
 #include <FL/Fl_Overlay_Window.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Tree.H>
 #include <FL/Fl_Native_File_Chooser.H>
 #pragma warning(pop)
 
@@ -39,9 +40,11 @@ private:
 	// GUI containers
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
-	Workspace *_sidebar, *_map_scroll;
+	Workspace *_metatile_sidebar, *_map_scroll;
+	OS_Scroll *_map_list_sidebar;
 	Toolbar *_status_bar;
 	Fl_Group *_map_group;
+	Fl_Tree *_map_list_tree;
 	// GUI inputs
 	DnD_Receiver *_dnd_receiver;
 	Fl_Menu_Item *_recent_mis[NUM_RECENT];

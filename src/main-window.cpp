@@ -166,13 +166,25 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_status_bar->end();
 	begin();
 
-	// Sidebar
+	// Metatile Sidebar
 	int sw = METATILE_PX_SIZE * (zoom_config ? ZOOM_FACTOR : 1) * METATILES_PER_ROW + Fl::scrollbar_size();
-	_sidebar = new Workspace(wx, wy, sw, wh);
-	wx += _sidebar->w();
-	ww -= _sidebar->w();
-	_sidebar->type(Fl_Scroll::VERTICAL_ALWAYS);
-	_sidebar->end();
+	_metatile_sidebar = new Workspace(wx, wy, sw, wh);
+	wx += _metatile_sidebar->w();
+	ww -= _metatile_sidebar->w();
+	_metatile_sidebar->type(Fl_Scroll::VERTICAL_ALWAYS);
+	_metatile_sidebar->end();
+	begin();
+
+	// Map List Sidebar
+	// TODO: if we're adding new sidebars/windows, having them be (un)dockable would be prefered.
+	int LIST_SIDEBAR_WIDTH = 200;
+	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
+	int lsw = LIST_SIDEBAR_WIDTH;
+	_map_list_sidebar = new OS_Scroll(lsx, wy, lsw, wh); 
+	ww -= _map_list_sidebar->w();
+	_map_list_sidebar->type(Fl_Scroll::VERTICAL);
+	_map_list_tree = new Fl_Tree(wx, wy, 0, 0);
+	_map_list_tree->end();
 	begin();
 
 	// Rulers
@@ -728,7 +740,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 Main_Window::~Main_Window() {
 	delete _menu_bar; // includes menu items
 	delete _toolbar; // includes toolbar buttons
-	delete _sidebar; // includes metatiles
+	delete _metatile_sidebar; // includes metatiles
 	delete _status_bar; // includes status bar fields
 	delete _map_scroll; // includes map and blocks
 	delete _dnd_receiver;
@@ -1379,17 +1391,17 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	_png_chooser->preset_file(buffer);
 
 	// populate sidebar with metatile buttons
-	_sidebar->scroll_to(0, 0);
+	_metatile_sidebar->scroll_to(0, 0);
 	size_t n = _metatileset.size();
 	for (size_t i = 0; i < n; i++) {
 		int x = ms * (i % METATILES_PER_ROW), y = ms * (i / METATILES_PER_ROW);
-		Metatile_Button *mtb = new Metatile_Button(_sidebar->x() + x, _sidebar->y() + y, ms, (uint8_t)i);
+		Metatile_Button *mtb = new Metatile_Button(_metatile_sidebar->x() + x, _metatile_sidebar->y() + y, ms, (uint8_t)i);
 		mtb->callback((Fl_Callback *)select_metatile_cb, this);
-		_sidebar->add(mtb);
+		_metatile_sidebar->add(mtb);
 		_metatile_buttons[i] = mtb;
 	}
-	_sidebar->init_sizes();
-	_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)n + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
+	_metatile_sidebar->init_sizes();
+	_metatile_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)n + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
 
 	if (n) {
 		_metatile_buttons[0]->setonly();
@@ -1761,9 +1773,9 @@ void Main_Window::force_add_sub_metatiles(size_t s, size_t n) {
 		// add metatiles
 		for (size_t i = (int)s; i < n; i++) {
 			int x = ms * (i % METATILES_PER_ROW), y = ms * (i / METATILES_PER_ROW);
-			Metatile_Button *mtb = new Metatile_Button(_sidebar->x() + x, _sidebar->y() - _sidebar->yposition() + y, ms, (uint8_t)i);
+			Metatile_Button *mtb = new Metatile_Button(_metatile_sidebar->x() + x, _metatile_sidebar->y() - _metatile_sidebar->yposition() + y, ms, (uint8_t)i);
 			mtb->callback((Fl_Callback *)select_metatile_cb, this);
-			_sidebar->add(mtb);
+			_metatile_sidebar->add(mtb);
 			_metatile_buttons[i] = mtb;
 		}
 	}
@@ -1786,21 +1798,21 @@ void Main_Window::force_add_sub_metatiles(size_t s, size_t n) {
 		if (_selected->id() >= n) {
 			_selected = _metatile_buttons[0];
 			_selected->setonly();
-			_sidebar->scroll_to(0, 0);
+			_metatile_sidebar->scroll_to(0, 0);
 		}
 		for (size_t i = n; i < s; i++) {
-			_sidebar->remove((int)n);
+			_metatile_sidebar->remove((int)n);
 			_metatile_buttons[i] = NULL;
 		}
 		int k = ms * ((int)(n - 1) / METATILES_PER_ROW + 1);
-		if (_sidebar->yposition() + _sidebar->h() > k) {
-			_sidebar->scroll_to(0, std::max(k - _sidebar->h(), 0));
+		if (_metatile_sidebar->yposition() + _metatile_sidebar->h() > k) {
+			_metatile_sidebar->scroll_to(0, std::max(k - _metatile_sidebar->h(), 0));
 		}
 	}
 
-	_sidebar->size(ms * METATILES_PER_ROW + Fl::scrollbar_size(), _sidebar->h());
-	_sidebar->init_sizes();
-	_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)_metatileset.size() + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
+	_metatile_sidebar->size(ms * METATILES_PER_ROW + Fl::scrollbar_size(), _metatile_sidebar->h());
+	_metatile_sidebar->init_sizes();
+	_metatile_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)_metatileset.size() + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
 
 	Tileset &tileset = _metatileset.tileset();
 	_block_window->tileset(&tileset);
@@ -2319,18 +2331,18 @@ void Main_Window::update_layout() {
 	int ms = metatile_size();
 	size_t n = _metatileset.size();
 	int rs = Fl::scrollbar_size();
-	_sidebar->size(ms * METATILES_PER_ROW + rs, _sidebar->h());
-	int ox = _sidebar->w() + (rulers() ? rs : 0);
+	_metatile_sidebar->size(ms * METATILES_PER_ROW + rs, _metatile_sidebar->h());
+	int ox = _metatile_sidebar->w() + (rulers() ? rs : 0);
 	int oy = rulers() ? rs : 0;
-	_hor_ruler->resize(ox, _sidebar->y(), w() - ox, rs);
-	_ver_ruler->resize(_sidebar->w(), _sidebar->y() + oy, rs, _sidebar->h() - oy);
-	_corner_ruler->resize(_sidebar->w(), _sidebar->y(), rs, rs);
-	_map_scroll->resize(ox, _sidebar->y() + oy, w() - ox, _sidebar->h() - oy);
+	_hor_ruler->resize(ox, _metatile_sidebar->y(), w() - ox, rs);
+	_ver_ruler->resize(_metatile_sidebar->w(), _metatile_sidebar->y() + oy, rs, _metatile_sidebar->h() - oy);
+	_corner_ruler->resize(_metatile_sidebar->w(), _metatile_sidebar->y(), rs, rs);
+	_map_scroll->resize(ox, _metatile_sidebar->y() + oy, w() - ox, _metatile_sidebar->h() - oy);
 	int gw = ((int)_map.width() + EVENT_MARGIN) * ms, gh = ((int)_map.height() + EVENT_MARGIN) * ms;
-	_map_group->resize(ox - _map_scroll->xposition(), _sidebar->y() + oy - _map_scroll->yposition(), gw, gh);
-	_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)n + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
+	_map_group->resize(ox - _map_scroll->xposition(), _metatile_sidebar->y() + oy - _map_scroll->yposition(), gw, gh);
+	_metatile_sidebar->contents(ms * METATILES_PER_ROW, ms * (((int)n + METATILES_PER_ROW - 1) / METATILES_PER_ROW));
 	_map_scroll->contents(_map_group->w(), _map_group->h());
-	int sx = _sidebar->x(), sy = _sidebar->y();
+	int sx = _metatile_sidebar->x(), sy = _metatile_sidebar->y();
 	for (size_t i = 0; i < n; i++) {
 		Metatile_Button *mt = _metatile_buttons[i];
 		int dx = ms * (i % METATILES_PER_ROW), dy = ms * (i / METATILES_PER_ROW);
@@ -2364,13 +2376,13 @@ void Main_Window::select_metatile(Metatile_Button *mb) {
 	_selected->setonly();
 	uint8_t id = mb->id();
 	int ms = metatile_size();
-	if (ms * (id / METATILES_PER_ROW) >= _sidebar->yposition() + _sidebar->h() - ms / 2) {
-		_sidebar->scroll_to(0, ms * (id / METATILES_PER_ROW + 1) - _sidebar->h());
-		_sidebar->redraw();
+	if (ms * (id / METATILES_PER_ROW) >= _metatile_sidebar->yposition() + _metatile_sidebar->h() - ms / 2) {
+		_metatile_sidebar->scroll_to(0, ms * (id / METATILES_PER_ROW + 1) - _metatile_sidebar->h());
+		_metatile_sidebar->redraw();
 	}
-	else if (ms * (id / METATILES_PER_ROW + 1) <= _sidebar->yposition() + ms / 2) {
-		_sidebar->scroll_to(0, ms * (id / METATILES_PER_ROW));
-		_sidebar->redraw();
+	else if (ms * (id / METATILES_PER_ROW + 1) <= _metatile_sidebar->yposition() + ms / 2) {
+		_metatile_sidebar->scroll_to(0, ms * (id / METATILES_PER_ROW));
+		_metatile_sidebar->redraw();
 	}
 }
 
@@ -2475,9 +2487,9 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	}
 
 	mw->label(PROGRAM_NAME);
-	mw->_sidebar->clear();
-	mw->_sidebar->scroll_to(0, 0);
-	mw->_sidebar->contents(0, 0);
+	mw->_metatile_sidebar->clear();
+	mw->_metatile_sidebar->scroll_to(0, 0);
+	mw->_metatile_sidebar->contents(0, 0);
 	std::fill_n(mw->_metatile_buttons, MAX_NUM_METATILES, (Metatile_Button *)NULL);
 	mw->_selected = NULL;
 	mw->_copied = false;
