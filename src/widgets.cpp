@@ -472,6 +472,16 @@ void Workspace::scrollbar_cb(Fl_Scrollbar *sb, void *) {
 	ws->scroll_to(ws->xposition(), sb->value());
 }
 
+OS_Tree::OS_Tree(int x, int y, int w, int h, const char *l) : Fl_Tree(x, y, w, h, l) {
+	box(OS_PANEL_THIN_UP_BOX);
+	labelfont(OS_FONT);
+	labelsize(OS_FONT_SIZE);
+	item_labelfont(OS_FONT);
+	item_labelsize(OS_FONT_SIZE);
+	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
+	selection_color(FL_SELECTION_COLOR);
+}
+
 Toolbar::Toolbar(int x, int y, int w, int h, const char *l) : Fl_Group(x, y, w, h, l), _spacer(0, 0, 0, 0) {
 	labeltype(FL_NO_LABEL);
 	box(OS_TOOLBAR_FRAME);

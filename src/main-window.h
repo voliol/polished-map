@@ -41,9 +41,9 @@ private:
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
 	Workspace *_metatile_sidebar, *_map_scroll;
+	OS_Tree *_map_list_tree;
 	Toolbar *_status_bar;
 	Fl_Group *_map_group;
-	Fl_Tree *_map_list_tree;
 	// GUI inputs
 	DnD_Receiver *_dnd_receiver;
 	Fl_Menu_Item *_recent_mis[NUM_RECENT];

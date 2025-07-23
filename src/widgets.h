@@ -11,6 +11,7 @@
 #include <FL/Fl_Hor_Nice_Slider.H>
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Tree.H>
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Radio_Round_Button.H>
@@ -167,6 +168,11 @@ public:
 private:
 	static void hscrollbar_cb(Fl_Scrollbar *sb, void *);
 	static void scrollbar_cb(Fl_Scrollbar *sb, void *);
+};
+
+class OS_Tree : public Fl_Tree {
+public:
+	OS_Tree(int x, int y, int w, int h, const char *l = NULL);
 };
 
 class Toolbar : public Fl_Group {

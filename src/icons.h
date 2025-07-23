@@ -47,6 +47,8 @@
 #include "coll-bottom-left-dark.xpm"
 #include "coll-bottom-right.xpm"
 #include "coll-bottom-right-dark.xpm"
+#include "group.xpm"
+#include "map.xpm"
 
 static Fl_Pixmap BLANK_ICON(BLANK_XPM);
 static Fl_Pixmap NEW_ICON(NEW_XPM);
@@ -90,5 +92,7 @@ static Fl_Pixmap COLL_BOTTOM_LEFT_ICON(COLL_BOTTOM_LEFT_XPM);
 static Fl_Pixmap COLL_BOTTOM_LEFT_DARK_ICON(COLL_BOTTOM_LEFT_DARK_XPM);
 static Fl_Pixmap COLL_BOTTOM_RIGHT_ICON(COLL_BOTTOM_RIGHT_XPM);
 static Fl_Pixmap COLL_BOTTOM_RIGHT_DARK_ICON(COLL_BOTTOM_RIGHT_DARK_XPM);
+static Fl_Pixmap GROUP_ICON(GROUP_XPM);
+static Fl_Pixmap MAP_ICON(MAP_XPM);
 
 #endif

@@ -181,7 +181,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int LIST_SIDEBAR_WIDTH = 300;
 	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
 	int lsw = LIST_SIDEBAR_WIDTH;
-	_map_list_tree = new Fl_Tree(lsx, wy, lsw, wh);
+	_map_list_tree = new OS_Tree(lsx, wy, lsw, wh);
 	ww -= _map_list_tree->w();
 	_map_list_tree->end();
 	begin();
@@ -1431,7 +1431,8 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 			fl_alert("Could not open map constants file: %s", map_constants);
 		}
 		
-		std::string groupname;
+		std::string groupname, mapname;
+		Fl_Tree_Item *item;
 		while (ifs.good()) {
 			std::string line;
 			std::getline(ifs, line);
@@ -1442,13 +1443,16 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 
 			if (macro == "newgroup") {
 				lss >> groupname;
+				item = _map_list_tree->add(groupname.c_str());
+				item->usericon(&GROUP_ICON);
+
 			} else if (macro == "map_const"   // "map_const": pokecrystal
 				       || macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
 			           || macro == "mapconst" // "mapconst": pokered
 					   ) {
-				std::string mapname;
 				lss >> mapname;
-				_map_list_tree->add((groupname + "/" + mapname).c_str());
+				item = _map_list_tree->add((groupname + "/" + mapname).c_str());
+				item->usericon(&MAP_ICON);
 			}
 		}
 	}
