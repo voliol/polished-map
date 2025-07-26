@@ -181,7 +181,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int LIST_SIDEBAR_WIDTH = 300;
 	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
 	int lsw = LIST_SIDEBAR_WIDTH;
-	_map_list_tree = new OS_Tree(lsx, wy, lsw, wh);
+	_map_list_tree = new Map_Tree(lsx, wy, lsw, wh);
 	ww -= _map_list_tree->w();
 	_map_list_tree->end();
 	begin();
@@ -1416,44 +1416,8 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 
 	// populate map list sidebar
 	if (filename) {
-		_map_list_tree->clear();
-		_map_list_tree->showroot(false);
-		_map_list_tree->widgetmarginleft(0);
-		_map_list_tree->connectorstyle(Fl_Tree_Connector::FL_TREE_CONNECTOR_NONE);
-		
-		char map_constants[FL_PATH_MAX] = {};
-		Config::map_constants_path(map_constants, directory);
-
-		std::ifstream ifs;
-		open_ifstream(ifs, map_constants);
-		if (!ifs.good()) { 
-			// TODO: better error handling
-			fl_alert("Could not open map constants file: %s", map_constants);
-		}
-		
-		std::string groupname, mapname;
-		Fl_Tree_Item *item;
-		while (ifs.good()) {
-			std::string line;
-			std::getline(ifs, line);
-			std::istringstream lss(line);
-
-			std::string macro;
-			if (!leading_macro(lss, macro)) { continue; }
-
-			if (macro == "newgroup") {
-				lss >> groupname;
-				item = _map_list_tree->add(groupname.c_str());
-				item->usericon(&GROUP_ICON);
-
-			} else if (macro == "map_const"   // "map_const": pokecrystal
-				       || macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
-			           || macro == "mapconst" // "mapconst": pokered
-					   ) {
-				lss >> mapname;
-				item = _map_list_tree->add((groupname + "/" + mapname).c_str());
-				item->usericon(&MAP_ICON);
-			}
+		if (!_map_list_tree->populate(directory)) {
+			fl_alert("Could not populate map list tree");
 		}
 	}
 

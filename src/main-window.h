@@ -28,6 +28,7 @@
 #include "roof-window.h"
 #include "palette-window.h"
 #include "directory-chooser.h"
+#include "map-tree.h"
 
 #define METATILES_PER_ROW 4
 
@@ -41,7 +42,7 @@ private:
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
 	Workspace *_metatile_sidebar, *_map_scroll;
-	OS_Tree *_map_list_tree;
+	Map_Tree *_map_list_tree;
 	Toolbar *_status_bar;
 	Fl_Group *_map_group;
 	// GUI inputs
