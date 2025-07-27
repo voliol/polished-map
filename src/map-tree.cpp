@@ -143,6 +143,7 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 				std::cout << "filename=" << filename << std::endl;
 				
 				if (!filename.empty()) {
+					filename = std::string {_mainWindow->directory()} + filename;
 					_mainWindow->open_map(filename.c_str());
 				}
 
