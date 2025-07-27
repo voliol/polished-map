@@ -18,6 +18,16 @@ Map_Tree::Map_Tree(int x, int y, int w, int h, Main_Window *mainWindow)
 
 bool Map_Tree::populate(const char *directory) {
 
+	// We only allow populating once, since as things are, 
+	// the program may try to populate (including clearing all items)
+	// while in the midst of handling a mapItem...
+	// Which causes a segfault.
+	// This is not ideal of course, since the user *could* be trying
+	// to open up a map from a new project, and then the tree *should*
+	// be repopulated.
+	// When projects are handled better, this can be changed.
+	if (populated) return true;
+
 	clear();
 	
 	char map_constants[FL_PATH_MAX] = {};
@@ -52,6 +62,7 @@ bool Map_Tree::populate(const char *directory) {
 		}
 	}
 
+	populated = true;
 	return true;
 }
 
@@ -97,8 +108,6 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 			// Double left click -> open map
 			if (Fl::event_clicks() == 1) { // double click
 
-				std::cout << "item->label()=" << item->label() << std::endl;
-
 				std::string id = item->label();
 				macro_to_titlecase(id);
 				// _Blocks for modern pokecrystal+red, 
@@ -106,8 +115,6 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 				// Blocks for old pokered
 				id.append("(_Blocks|_Blockdata|Blocks):");
 				std::regex idReg(id);
-
-				std::cout << "id=" << id << std::endl;
 
 				char blocks_path[FL_PATH_MAX] = {};
 				Config::map_blocks_path(blocks_path, _mainWindow->directory().c_str());
@@ -123,7 +130,6 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 
 					if (std::regex_search(line, idReg)) {
 						foundID = true;
-						std::cout << "id in line: " << line << std::endl;
 					}
 
 					if (foundID) {
@@ -131,22 +137,17 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
     					std::smatch m;
     					std::regex_search(line, m, r);
 
-						std::cout << "regex_search 2 done in: " << line << std::endl;
-
 						if (m.length() != 0) {
 							filename = m.str(1);
 							break;
 						}
 					}
 				}
-
-				std::cout << "filename=" << filename << std::endl;
 				
 				if (!filename.empty()) {
 					filename = std::string {_mainWindow->directory()} + filename;
 					_mainWindow->open_map(filename.c_str());
 				}
-
 
 				item->label("left foobar click");
 			}

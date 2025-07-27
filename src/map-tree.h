@@ -23,6 +23,7 @@ private:
     void handleMapItem(Fl_Tree_Item *item);
 
     Main_Window *_mainWindow; // lazy way to get access to open_map() for now
+    bool populated;
 };
 
 #endif
