@@ -3,6 +3,7 @@
 #include <cwctype>
 #include <algorithm>
 #include <sys/stat.h>
+#include <iostream>
 
 #pragma warning(push, 0)
 #include <FL/filename.H>
@@ -70,6 +71,8 @@ void macro_to_titlecase(std::string &s) {
 	}
 
 	s.resize(writeIndex);
+
+	std::cout << "s=" << s << std::endl;
 }
 
 bool leading_macro(std::istringstream &iss, std::string &macro, const char *v) {

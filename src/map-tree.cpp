@@ -1,5 +1,6 @@
 #include <fstream>
 #include <regex>
+#include <iostream>
 
 #include "map-tree.h"
 #include "config.h"
@@ -40,11 +41,12 @@ bool Map_Tree::populate(const char *directory) {
 			item = add(groupname.c_str());
 			usericon(&GROUP_ICON);
 
-		} else if (macro == "map_const"   // "map_const": pokecrystal
+		} else if (macro == "map_const"    // "map_const": pokecrystal
 					|| macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
 					|| macro == "mapconst" // "mapconst": pokered
 					) {
 			lss >> mapname;
+			mapname.pop_back(); // remove comma
 			item = add((groupname + "/" + mapname).c_str());
 			item->usericon(&MAP_ICON);
 		}
@@ -94,7 +96,8 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 		case FL_LEFT_MOUSE:
 			// Double left click -> open map
 			if (Fl::event_clicks() == 1) { // double click
-				item->label("left double click");
+
+				std::cout << "item->label()=" << item->label() << std::endl;
 
 				std::string id = item->label();
 				macro_to_titlecase(id);
@@ -104,12 +107,14 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 				id.append("(_Blocks|_Blockdata|Blocks):");
 				std::regex idReg(id);
 
+				std::cout << "id=" << id << std::endl;
+
 				char blocks_path[FL_PATH_MAX] = {};
 				Config::map_blocks_path(blocks_path, _mainWindow->directory().c_str());
 				std::ifstream ifs;
 				open_ifstream(ifs, blocks_path);
 
-				const char *filename = NULL;
+				std::string filename;
 				bool foundID = false;
 				while (ifs.good()) {
 
@@ -118,23 +123,31 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 
 					if (std::regex_search(line, idReg)) {
 						foundID = true;
+						std::cout << "id in line: " << line << std::endl;
 					}
 
 					if (foundID) {
-						std::regex r("(?<=INCBIN \")[^\"]*");
+						std::regex r("INCBIN \"([^\"]*)");
     					std::smatch m;
     					std::regex_search(line, m, r);
 
+						std::cout << "regex_search 2 done in: " << line << std::endl;
+
 						if (m.length() != 0) {
-							filename = m[0].str().c_str();
+							filename = m.str(1);
 							break;
 						}
 					}
 				}
+
+				std::cout << "filename=" << filename << std::endl;
 				
-				if (filename) {
-					_mainWindow->open_map(filename);
+				if (!filename.empty()) {
+					_mainWindow->open_map(filename.c_str());
 				}
+
+
+				item->label("left foobar click");
 			}
 			break;
 	}

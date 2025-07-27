@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <queue>
 #include <utility>
+#include <iostream>
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
@@ -1264,7 +1265,12 @@ void Main_Window::swap_blocks(uint8_t f, uint8_t t) {
 }
 
 void Main_Window::open_map(const char *filename) {
+
+	std::cout << "filename=" << filename << std::endl;
+
 	const char *basename = fl_filename_name(filename);
+
+	std::cout << "basename=" << basename << std::endl;
 
 	char directory[FL_PATH_MAX] = {};
 	if (!Config::project_path_from_blk_path(filename, directory)) {
