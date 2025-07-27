@@ -1,3 +1,7 @@
+This branch aims to streamline the map creation process, so all steps in the two following tutorials can be done from within the tool (except some scripting): [pokecrystal map adding](https://github.com/pret/pokecrystal/wiki/Add-a-new-map-and-landmark), [pokered map adding](https://github.com/pret/pokered/wiki/Add-a-New-Map-to-the-Game). More dramatically put, the goal is to turn polished-map from primarily a map block editor, to a full map editor.
+
+# Original Readme:
+
 # Polished Map [![Build Status](https://github.com/Rangi42/polished-map/actions/workflows/main.yml/badge.svg)](https://github.com/Rangi42/polished-map/actions)
 
 A map and tileset editor for [pokecrystal](https://github.com/pret/pokecrystal), [pokegold](https://github.com/pret/pokegold), [pokeyellow](https://github.com/pret/pokeyellow), [pokered](https://github.com/pret/pokered), and hacks including [Polished Crystal v2](https://github.com/Rangi42/polishedcrystal/tree/v2.2.0), [Red++ v3](https://github.com/TheFakeMateo/rpp-backup), [Orange](https://github.com/PiaCarrot/pokeorange), [Prism](http://www.pokemonprism.com/), and many more.
