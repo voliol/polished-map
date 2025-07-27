@@ -1,11 +1,14 @@
 #include <fstream>
+#include <regex>
 
 #include "map-tree.h"
 #include "config.h"
 #include "utils.h"
+#include "main-window.h"
 #include "icons.h"
 
-Map_Tree::Map_Tree(int x, int y, int w, int h, const char* l) : OS_Tree(x, y, w, h, l) {
+Map_Tree::Map_Tree(int x, int y, int w, int h, Main_Window *mainWindow) 
+	: OS_Tree(x, y, w, h), _mainWindow(mainWindow) {
 	showroot(false);
 	widgetmarginleft(0);
 	connectorstyle(Fl_Tree_Connector::FL_TREE_CONNECTOR_NONE);
@@ -13,19 +16,15 @@ Map_Tree::Map_Tree(int x, int y, int w, int h, const char* l) : OS_Tree(x, y, w,
 }
 
 bool Map_Tree::populate(const char *directory) {
+
+	clear();
 	
 	char map_constants[FL_PATH_MAX] = {};
 	Config::map_constants_path(map_constants, directory);
 
 	std::ifstream ifs;
 	open_ifstream(ifs, map_constants);
-	if (!ifs.good()) { 
-		return false;
-	}
 
-
-	clear();
-	
 	std::string groupname, mapname;
 	Fl_Tree_Item *item;
 	while (ifs.good()) {
@@ -96,10 +95,51 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 			// Double left click -> open map
 			if (Fl::event_clicks() == 1) { // double click
 				item->label("left double click");
+
+				std::string id = item->label();
+				macro_to_titlecase(id);
+				// _Blocks for modern pokecrystal+red, 
+				// _Blockdata for old pokecrystal, 
+				// Blocks for old pokered
+				id.append("(_Blocks|_Blockdata|Blocks):");
+				std::regex idReg(id);
+
+				char blocks_path[FL_PATH_MAX] = {};
+				Config::map_blocks_path(blocks_path, _mainWindow->directory().c_str());
+				std::ifstream ifs;
+				open_ifstream(ifs, blocks_path);
+
+				const char *filename = NULL;
+				bool foundID = false;
+				while (ifs.good()) {
+
+					std::string line;
+					std::getline(ifs, line);
+
+					if (std::regex_search(line, idReg)) {
+						foundID = true;
+					}
+
+					if (foundID) {
+						std::regex r("(?<=INCBIN \")[^\"]*");
+    					std::smatch m;
+    					std::regex_search(line, m, r);
+
+						if (m.length() != 0) {
+							filename = m[0].str().c_str();
+							break;
+						}
+					}
+				}
+				
+				if (filename) {
+					_mainWindow->open_map(filename);
+				}
 			}
 			break;
 	}
 	// + some way of changing a map's name, and moving it to another group.
 	//   By dragging? Though dragging only is a pain.
 	//   It might only make sense to change a map's settings while it is open?
+
 }

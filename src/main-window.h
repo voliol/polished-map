@@ -35,6 +35,8 @@
 
 enum class Mode { BLOCKS, EVENTS };
 
+class Map_Tree;
+
 class Main_Window : public Fl_Overlay_Window {
 private:
 	// GUI containers
@@ -178,6 +180,7 @@ public:
 	void substitute_block(uint8_t f, uint8_t t);
 	void swap_blocks(uint8_t f, uint8_t t);
 	void open_map(const char *filename);
+	inline std::string const directory(void) { return _directory; } // TODO: temp
 private:
 	inline void mode(Mode m) { _mode = m; }
 	int handle_hotkey(int key);

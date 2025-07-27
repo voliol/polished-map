@@ -181,7 +181,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int LIST_SIDEBAR_WIDTH = 300;
 	int lsx = wx + ww - LIST_SIDEBAR_WIDTH;
 	int lsw = LIST_SIDEBAR_WIDTH;
-	_map_list_tree = new Map_Tree(lsx, wy, lsw, wh);
+	_map_list_tree = new Map_Tree(lsx, wy, lsw, wh, this);
 	ww -= _map_list_tree->w();
 	_map_list_tree->end();
 	begin();

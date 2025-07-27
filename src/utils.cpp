@@ -54,6 +54,24 @@ void lowercase(std::string &s) {
 	std::transform(RANGE(s), s.begin(), [](char c) { return (char)tolower(c); });
 }
 
+void macro_to_titlecase(std::string &s) { 
+	std::string result;
+    size_t writeIndex = 0;
+
+	bool capitalizeNext = true;
+	for (size_t readIndex = 0; readIndex < s.size(); ++readIndex) {
+		char c = s[readIndex];
+		if (c == '_') {
+			capitalizeNext = true;
+		} else {
+			s[writeIndex++] = capitalizeNext ? c : std::tolower(c);
+			capitalizeNext = (c >= '0') && (c <= '9');
+		}
+	}
+
+	s.resize(writeIndex);
+}
+
 bool leading_macro(std::istringstream &iss, std::string &macro, const char *v) {
 	int first = iss.peek();
 	bool indented = first == ' ' || first == '\t';

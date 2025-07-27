@@ -232,6 +232,20 @@ void Config::map_header_path(char *dest, const char *root, const char *map_name)
 	sprintf(dest, "%sdata" DIR_SEP "mapHeaders" DIR_SEP "%s.asm", root, map_name);
 }
 
+void Config::map_blocks_path(char *dest, const char *root) {
+	// try data/maps/blocks.asm (pokecrystal)
+	sprintf(dest, "%sdata" DIR_SEP "maps" DIR_SEP "blocks.asm", root);
+	if (file_exists(dest)) { return; }
+	// try maps/blockdata.asm (old pokecrystal)
+	sprintf(dest, "%smaps" DIR_SEP "blockdata.asm", root);
+	if (file_exists(dest)) { return; }
+	// try maps.asm (pokered)
+	sprintf(dest, "%smaps.asm", root);
+	if (file_exists(dest)) { return; }
+	// last resort: main.asm (old pokered)
+	sprintf(dest, "%smain.asm", root);
+}
+
 void Config::event_script_path(char *dest, const char *root, const char *map_name) {
 	// try maps/*.asm (pokecrystal, Prism)
 	sprintf(dest, "%smaps" DIR_SEP "%s.asm", root, map_name);
