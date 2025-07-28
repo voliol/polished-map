@@ -16,7 +16,7 @@ Map_Tree::Map_Tree(int x, int y, int w, int h, Main_Window *mainWindow)
     // empty
 }
 
-bool Map_Tree::populate(const char *directory) {
+bool Map_Tree::populate(Poke_Project *poke_project) {
 
 	// We only allow populating once, since as things are, 
 	// the program may try to populate (including clearing all items)
@@ -28,10 +28,12 @@ bool Map_Tree::populate(const char *directory) {
 	// When projects are handled better, this can be changed.
 	if (populated) return true;
 
+	_poke_project = poke_project;
+
 	clear();
 	
 	char map_constants[FL_PATH_MAX] = {};
-	Config::map_constants_path(map_constants, directory);
+	Config::map_constants_path(map_constants, _poke_project->directory().c_str());
 
 	std::ifstream ifs;
 	open_ifstream(ifs, map_constants);
@@ -117,7 +119,7 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 				std::regex idReg(id);
 
 				char blocks_path[FL_PATH_MAX] = {};
-				Config::map_blocks_path(blocks_path, _mainWindow->directory().c_str());
+				Config::map_blocks_path(blocks_path, _poke_project->directory().c_str());
 				std::ifstream ifs;
 				open_ifstream(ifs, blocks_path);
 
@@ -145,11 +147,9 @@ void Map_Tree::handleMapItem(Fl_Tree_Item *item) {
 				}
 				
 				if (!filename.empty()) {
-					filename = std::string {_mainWindow->directory()} + filename;
+					filename = _poke_project->directory() + filename;
 					_mainWindow->open_map(filename.c_str());
 				}
-
-				item->label("left foobar click");
 			}
 			break;
 	}

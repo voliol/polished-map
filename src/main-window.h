@@ -28,6 +28,7 @@
 #include "palette-window.h"
 #include "directory-chooser.h"
 #include "map-tree.h"
+#include "poke-project.h"
 
 #define METATILES_PER_ROW 4
 
@@ -100,7 +101,8 @@ private:
 	Palette_Window *_palette_window;
 	Monochrome_Palette_Window *_monochrome_palette_window;
 	// Data
-	std::string _directory, _blk_file, _asm_file;
+	Poke_Project *_poke_project;
+	std::string _blk_file, _asm_file;
 	std::string _recent[NUM_RECENT];
 	Metatileset _metatileset;
 	Map _map;
@@ -180,7 +182,7 @@ public:
 	void substitute_block(uint8_t f, uint8_t t);
 	void swap_blocks(uint8_t f, uint8_t t);
 	void open_map(const char *filename);
-	inline std::string const directory(void) { return _directory; } // TODO: temp
+	inline Poke_Project *poke_project(void) { return _poke_project; }
 private:
 	inline void mode(Mode m) { _mode = m; }
 	int handle_hotkey(int key);
@@ -189,6 +191,7 @@ private:
 	void update_monochrome_controls(void);
 	void store_recent_map(void);
 	void update_recent_maps(void);
+	void open_project(const char *dircstr);
 	void open_map(const char *directory, const char *filename);
 	void open_recent(int n);
 	void warp_to_map(Event *e);

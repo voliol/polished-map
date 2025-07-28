@@ -44,7 +44,7 @@
 #pragma warning(disable : 4458)
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_Window(x, y, w, h, PROGRAM_NAME),
-	_directory(), _blk_file(), _asm_file(), _recent(), _metatileset(), _map(), _map_events(), _status_event_x(INT_MIN),
+	_blk_file(), _asm_file(), _recent(), _metatileset(), _map(), _map_events(), _status_event_x(INT_MIN),
 	_status_event_y(INT_MIN), _metatile_buttons(), _clipboard(0), _wx(x), _wy(y), _ww(w), _wh(h) {
 	// Get global configs
 	Mode mode_config = (Mode)Preferences::get("mode", (int)Mode::BLOCKS);
@@ -768,6 +768,7 @@ Main_Window::~Main_Window() {
 	delete _roof_window;
 	delete _palette_window;
 	delete _monochrome_palette_window;
+	delete _poke_project;
 }
 
 void Main_Window::show() {
@@ -873,13 +874,13 @@ const char *Main_Window::modified_filename() {
 	static char buffer[FL_PATH_MAX] = {};
 	const Tileset &tileset = _metatileset.const_tileset();
 	if (tileset.modified()) {
-		Config::tileset_path(buffer, _directory.c_str(), tileset.name());
+		Config::tileset_path(buffer, _poke_project->directory().c_str(), tileset.name());
 	}
 	else if (tileset.modified_roof()) {
-		Config::roof_path(buffer, _directory.c_str(), tileset.roof_name());
+		Config::roof_path(buffer, _poke_project->directory().c_str(), tileset.roof_name());
 	}
 	else {
-		Config::metatileset_path(buffer, _directory.c_str(), _metatileset.tileset().name());
+		Config::metatileset_path(buffer, _poke_project->directory().c_str(), _metatileset.tileset().name());
 	}
 	return fl_filename_name(buffer);
 }
@@ -1264,6 +1265,22 @@ void Main_Window::swap_blocks(uint8_t f, uint8_t t) {
 	}
 }
 
+void Main_Window::open_project(const char *dircstr) {
+	const std::string directory {dircstr};
+	if (_poke_project == NULL || directory != _poke_project->directory()) {
+		_poke_project = new Poke_Project(directory);
+
+		// populate map list sidebar
+		if (!_map_list_tree->populate(_poke_project)) {
+			fl_alert("Could not populate map list tree");
+		}
+
+		std::string msg {"Opened project at " + directory};
+		_success_dialog->message(msg);
+		_success_dialog->show(this);
+	}
+}
+
 void Main_Window::open_map(const char *filename) {
 
 	std::cout << "filename=" << filename << std::endl;
@@ -1280,6 +1297,8 @@ void Main_Window::open_map(const char *filename) {
 		_error_dialog->show(this);
 		return;
 	}
+
+	open_project(directory);
 
 	open_map(directory, filename);
 }
@@ -1311,7 +1330,6 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	_metatileset.modified(false);
 	close_cb(NULL, this);
 
-	_directory = directory;
 	if (filename) {
 		_blk_file = filename;
 	}
@@ -1419,13 +1437,6 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	_block_window->tileset(&tileset);
 	_tileset_window->tileset(&tileset);
 	_roof_window->tileset(&tileset);
-
-	// populate map list sidebar
-	if (filename) {
-		if (!_map_list_tree->populate(directory)) {
-			fl_alert("Could not populate map list tree");
-		}
-	}
 
 	// load default palettes
 	Config::bg_tiles_pal_path(buffer, directory);
@@ -1648,7 +1659,7 @@ void Main_Window::load_palettes(const char *filename) {
 
 void Main_Window::load_roof_colors(bool quiet) {
 	char buffer[FL_PATH_MAX] = {};
-	Config::roofs_pal_path(buffer, _directory.c_str());
+	Config::roofs_pal_path(buffer, _poke_project->directory().c_str());
 
 	if (_edited_palettes) {
 		const char *basename = fl_filename_name(buffer);
@@ -1692,7 +1703,7 @@ bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_
 	tileset.name(tileset_name);
 	tileset.roof_name(roof_name);
 
-	const char *directory = _directory.c_str();
+	const char *directory = _poke_project->directory().c_str();
 
 	Config::palette_map_path(buffer, directory, tileset_name);
 	Palette_Map::Result rp = tileset.read_palette_map(buffer);
@@ -1723,6 +1734,9 @@ bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_
 	char b_buffer[FL_PATH_MAX] = {}, a_buffer[FL_PATH_MAX] = {};
 	bool has_before = Config::tileset_before_path(b_buffer, directory, tileset_name);
 	bool has_after = Config::tileset_after_path(a_buffer, directory, tileset_name);
+	
+	std::cout << "reading general tileset; directory=" << directory << std::endl;
+
 	Tileset::Result rt = tileset.read_graphics(buffer, has_before ? b_buffer : NULL, has_after ? a_buffer : NULL, palettes());
 	if (rt != Tileset::Result::GFX_OK) {
 		Config::tileset_path(buffer, "", tileset_name);
@@ -1759,6 +1773,9 @@ bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_
 
 	if (tileset.has_roof()) {
 		Config::roof_path(buffer, directory, roof_name);
+
+		std::cout << "reading roof tiles" << std::endl;
+
 		rt = tileset.read_roof_graphics(buffer);
 		if (rt != Tileset::Result::GFX_OK) {
 			Config::roof_path(buffer, "", roof_name);
@@ -1983,7 +2000,7 @@ bool Main_Window::save_map(bool force) {
 }
 
 bool Main_Window::save_metatileset() {
-	const char *directory = _directory.c_str();
+	const char *directory = _poke_project->directory().c_str();
 	const char *tileset_name = _metatileset.tileset().name();
 
 	char filename[FL_PATH_MAX] = {};
@@ -2063,7 +2080,7 @@ bool Main_Window::save_tileset() {
 	Tileset &tileset = _metatileset.tileset();
 
 	char filename[FL_PATH_MAX] = {}, b_filename[FL_PATH_MAX] = {}, a_filename[FL_PATH_MAX] = {};
-	const char *directory = _directory.c_str();
+	const char *directory = _poke_project->directory().c_str();
 	const char *tileset_name = tileset.name();
 
 	if (!tileset.modified()) {
@@ -2145,7 +2162,7 @@ bool Main_Window::save_roof() {
 	Tileset &tileset = _metatileset.tileset();
 
 	char filename[FL_PATH_MAX] = {};
-	const char *directory = _directory.c_str();
+	const char *directory = _poke_project->directory().c_str();
 	const char *roof_name = tileset.roof_name();
 
 	if (!tileset.modified_roof()) {
@@ -2441,7 +2458,7 @@ void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
 		strcat(directory, DIR_SEP);
 	}
 	else {
-		strcpy(directory, mw->_directory.c_str());
+		strcpy(directory, mw->_poke_project->directory().c_str());
 	}
 
 	Config::project_path_from_blk_path(directory, directory);
@@ -2516,7 +2533,6 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_map_scroll->contents(0, 0);
 	mw->init_sizes();
 	mw->update_status((Block *)NULL);
-	mw->_directory.clear();
 	mw->_blk_file.clear();
 	mw->_metatileset.clear();
 	mw->_block_window->tileset(NULL);
@@ -2577,7 +2593,6 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	mw->_directory.assign(directory);
 	mw->_blk_file.assign(filename);
 
 	char buffer[FL_PATH_MAX] = {};
@@ -3380,7 +3395,7 @@ void Main_Window::change_roof_cb(Fl_Widget *, Main_Window *mw) {
 	tileset.roof_name(roof_name);
 	if (tileset.has_roof()) {
 		char filename[FL_PATH_MAX] = {};
-		Config::roof_path(filename, mw->_directory.c_str(), roof_name);
+		Config::roof_path(filename, mw->_poke_project->directory().c_str(), roof_name);
 		Tileset::Result rt = tileset.read_roof_graphics(filename);
 		if (rt != Tileset::Result::GFX_OK) {
 			Config::roof_path(filename, "", roof_name);
