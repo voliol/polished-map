@@ -2,6 +2,7 @@
 #include <queue>
 #include <utility>
 #include <iostream>
+#include <sstream>
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
@@ -1275,6 +1276,7 @@ void Main_Window::open_project(const char *dircstr) {
 			fl_alert("Could not populate map list tree");
 		}
 
+		std::cout << "opened " << *_poke_project << std::endl;
 		std::string msg {"Opened project at " + directory};
 		_success_dialog->message(msg);
 		_success_dialog->show(this);

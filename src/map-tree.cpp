@@ -35,6 +35,9 @@ bool Map_Tree::populate(Poke_Project *poke_project) {
 	char map_constants[FL_PATH_MAX] = {};
 	Config::map_constants_path(map_constants, _poke_project->directory().c_str());
 
+
+	std::cout << "map_constants=" << map_constants << std::endl;
+
 	std::ifstream ifs;
 	open_ifstream(ifs, map_constants);
 
@@ -59,6 +62,7 @@ bool Map_Tree::populate(Poke_Project *poke_project) {
 					) {
 			lss >> mapname;
 			mapname.pop_back(); // remove comma
+			std::cout << "adding map: " << (groupname + "/" + mapname) << std::endl;
 			item = add((groupname + "/" + mapname).c_str());
 			item->usericon(&MAP_ICON);
 		}
