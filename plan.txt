@@ -1,0 +1,83 @@
+Open Project
+- menu option/file select
+- detect what kind of project it is (pokered, pokecrystal, etc. (?))
+- populate the the list with (groups and) maps
+
+Open Map
+- either via menu option/file select, or via the map list
+- if a map is open, ask if you want to [Save Map]
+- if via file selection, [Open Project] first
+- get info about the map 
+- [Setup Block Editing]
+
+New Map
+- no longer allowed without project
+- either by menu option or map list
+- [Map Options]
+	- if new map was created via group, that group is auto-selected
+- create blank map using this info
+- [Setup Block Editing] 
+
+Setup Block Editing
+- populate the blocks selections
+- populate the blocks editor
+
+Save Map
+- menu option
+- dialog when program is closed
+- opens all relevant files and saves the map info
+
+Map Options
+- map id/name
+- group selection (if applicable)
+- sub-pane for [Group Options]
+- blocks selection
+	- can be "Unique", any named blocks already shared, or "Same as..."
+	- "Same as..." makes you select another map
+- sub-pane for [Blocks Options]
+- fishing group
+- headbutt group (if applicable)
+	- there's some distinction between having TREEMON_SET_NONE and having no headbutt group defined
+- environment
+- location (landmark)
+- music
+- phone service checkbox
+- ToD palette
+- border block
+- [Edit Connections]
+
+Group Options
+- accessible through map options, and separately through the map list
+- group id/name
+- roof type
+- roof colors
+- SGB roof colors
+- outdoor sprite set
+- button to [Edit Outdoor Sprite Set]
+
+Blocks Options
+- name
+	- only editable if multiple maps share the same blocks
+	- otherwise defaults to being derived from the map's name
+- tileset ?
+- whatever else is stored in the blocks files
+
+Edit Connections
+...
+
+Edit Fishing Group
+...
+
+Edit Headbutt Group
+...
+
+Edit Encounters
+- maps can either have unique encounters, or no encounters
+- the # of slots could be read from ASM, or just hardcoded
+
+Edit Outdoor Sprite Set
+...
+
+Landmark Editor (?)
+- possibly out-of-scope; requires a townmap editor
+- if there isn't one already??
