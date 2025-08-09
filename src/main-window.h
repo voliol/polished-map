@@ -63,7 +63,7 @@ private:
 		*_special_palettes_mi = NULL, *_roof_colors_mi = NULL, *_drag_and_drop_mi = NULL, *_overworld_map_size_mi = NULL;
 	Fl_Menu_Item *_roof_custom_mi = NULL, *_roof_day_nite_mi = NULL, *_roof_morn_day_nite_mi = NULL,
 		*_roof_day_nite_custom_mi = NULL, *_roof_morn_day_nite_custom_mi = NULL;
-	Toolbar_Button *_new_tb, *_open_tb, *_load_event_script_tb, *_reload_event_script_tb, *_save_tb, *_print_tb,
+	Toolbar_Button *_open_project_tb, *_new_map_tb, *_load_event_script_tb, *_reload_event_script_tb, *_save_tb, *_print_tb,
 		*_undo_tb, *_redo_tb, *_add_sub_tb, *_resize_tb, *_change_tileset_tb, *_change_roof_tb, *_edit_tileset_tb,
 		*_edit_roof_tb, *_load_palettes_tb, *_edit_current_palettes_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rulers_tb, *_zoom_tb, *_ids_tb, *_hex_tb, *_show_events_tb, *_show_warp_ids_tb,
@@ -74,6 +74,7 @@ private:
 	Ruler *_hor_ruler, *_ver_ruler, *_corner_ruler;
 	Label *_metatile_count, *_map_dimensions, *_hover_id, *_hover_xy, *_hover_event;
 	// Conditional menu items
+	Fl_Menu_Item *_new_map_mi = NULL;
 	Fl_Menu_Item *_load_event_script_mi = NULL, *_view_event_script_mi, *_reload_event_script_mi = NULL,
 		*_unload_event_script_mi = NULL, *_load_roof_colors_mi = NULL, *_close_mi = NULL, *_save_mi = NULL,
 		*_save_as_mi = NULL, *_save_map_mi = NULL, *_save_blockset_mi = NULL, *_save_tileset_mi = NULL,
@@ -222,7 +223,8 @@ private:
 	// Drag-and-drop
 	static void drag_and_drop_cb(DnD_Receiver *dndr, Main_Window *mw);
 	// File menu
-	static void new_cb(Fl_Widget *w, Main_Window *mw);
+	static void open_project_cb(Fl_Widget *w, Main_Window *mw);
+	static void new_map_cb(Fl_Widget *w, Main_Window *mw);
 	static void open_cb(Fl_Widget *w, Main_Window *mw);
 	static void open_recent_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void clear_recent_cb(Fl_Menu_ *m, Main_Window *mw);

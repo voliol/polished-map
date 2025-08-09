@@ -112,8 +112,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_toolbar = new Toolbar(wx, wy, w, 26);
 	wy += _toolbar->h();
 	wh -= _toolbar->h();
-	_new_tb = new Toolbar_Button(0, 0, 24, 24);
-	_open_tb = new Toolbar_Button(0, 0, 24, 24);
+	_open_project_tb = new Toolbar_Button(0, 0, 24, 24);
+	_new_map_tb = new Toolbar_Button(0, 0, 24, 24);
 	_load_event_script_tb = new Toolbar_Button(0, 0, 24, 24);
 	_reload_event_script_tb = new Toolbar_Button(0, 0, 24, 24);
 	_save_tb = new Toolbar_Button(0, 0, 24, 24);
@@ -287,9 +287,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	Fl_Menu_Item menu_items[] = {
 		// label, shortcut, callback, data, flags
 		OS_SUBMENU("&File"),
-		OS_MENU_ITEM("&New...", FL_COMMAND + 'n', (Fl_Callback *)new_cb, this, 0),
-		OS_MENU_ITEM("&Open...", FL_COMMAND + 'o', (Fl_Callback *)open_cb, this, 0),
-		OS_MENU_ITEM("Open Recent", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Open Project...", FL_COMMAND + 'o', (Fl_Callback *)open_project_cb, this, 0),
+		OS_MENU_ITEM("&New Map...", FL_COMMAND + 'n', (Fl_Callback *)new_map_cb, this, 0),
+		OS_MENU_ITEM("Open Map via BLK...", FL_COMMAND + 'O', (Fl_Callback *)open_cb, this, 0),
+		OS_MENU_ITEM("Open Recent via BLK", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
 		// NUM_RECENT items with callback open_recent_cb
 		OS_NULL_MENU_ITEM(FL_ALT + '1', (Fl_Callback *)open_recent_cb, this, 0),
 		OS_NULL_MENU_ITEM(FL_ALT + '2', (Fl_Callback *)open_recent_cb, this, 0),
@@ -305,7 +306,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		{},
 		OS_MENU_ITEM("&Close", FL_COMMAND + 'w', (Fl_Callback *)close_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
-		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, 0),
+		OS_MENU_ITEM("Save As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, 0),
 		OS_MENU_ITEM("Save &Map", 0, (Fl_Callback *)save_map_cb, this, 0),
 		OS_MENU_ITEM("Save &Blockset", 0, (Fl_Callback *)save_metatiles_cb, this, 0),
 		OS_MENU_ITEM("Save &Tileset", 0, (Fl_Callback *)save_tileset_cb, this, 0),
@@ -497,6 +498,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_roof_colors_mi = PM_FIND_MENU_ITEM_CB(auto_load_roof_colors_cb);
 	_drag_and_drop_mi = PM_FIND_MENU_ITEM_CB(drag_and_drop_option_cb);
 	// Conditional menu items
+	_new_map_mi = PM_FIND_MENU_ITEM_CB(new_map_cb);
 	_load_event_script_mi = PM_FIND_MENU_ITEM_CB(load_event_script_cb);
 	_view_event_script_mi = PM_FIND_MENU_ITEM_CB(view_event_script_cb);
 	_reload_event_script_mi = PM_FIND_MENU_ITEM_CB(reload_event_script_cb);
@@ -543,14 +545,14 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 
 	// Configure toolbar buttons
 
-	_new_tb->tooltip("New... (Ctrl+N)");
-	_new_tb->callback((Fl_Callback *)new_cb, this);
-	_new_tb->image(NEW_ICON);
-	_new_tb->take_focus();
+	_open_project_tb->tooltip("Open Project... (Ctrl+O)");
+	_open_project_tb->callback((Fl_Callback *)open_project_cb, this);
+	_open_project_tb->image(OPEN_ICON);
 
-	_open_tb->tooltip("Open... (Ctrl+O)");
-	_open_tb->callback((Fl_Callback *)open_cb, this);
-	_open_tb->image(OPEN_ICON);
+	_new_map_tb->tooltip("New Map... (Ctrl+N)");
+	_new_map_tb->callback((Fl_Callback *)new_map_cb, this);
+	_new_map_tb->image(NEW_ICON);
+	_new_map_tb->take_focus();
 
 	_load_event_script_tb->tooltip("Load Event Script... (Ctrl+A)");
 	_load_event_script_tb->callback((Fl_Callback *)load_event_script_cb, this);
@@ -1034,6 +1036,13 @@ void Main_Window::update_gameboy_screen(Block *b) {
 
 void Main_Window::update_active_controls() {
 	update_priority_controls();
+	if (_poke_project != NULL) {
+		_new_map_mi->activate();
+		_new_map_tb->activate();
+	} else {
+		_new_map_mi->deactivate();
+		_new_map_tb->deactivate();
+	}
 	if (_map.size()) {
 		_load_event_script_mi->activate();
 		_load_event_script_tb->activate();
@@ -2301,8 +2310,8 @@ void Main_Window::update_icons() {
 	_ids_tb->image(dark ? IDS_DARK_ICON : IDS_ICON);
 	_hex_tb->image(dark ? HEX_DARK_ICON : HEX_ICON);
 	_blocks_mode_tb->image(dark ? BLOCKS_DARK_ICON : BLOCKS_ICON);
-	Image::make_deimage(_new_tb);
-	Image::make_deimage(_open_tb);
+	Image::make_deimage(_open_project_tb);
+	Image::make_deimage(_new_map_tb);
 	Image::make_deimage(_load_event_script_tb);
 	Image::make_deimage(_reload_event_script_tb);
 	Image::make_deimage(_save_tb);
@@ -2433,7 +2442,12 @@ void Main_Window::drag_and_drop_cb(DnD_Receiver *dndr, Main_Window *mw) {
 	mw->open_map(filename.c_str());
 }
 
-void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
+void Main_Window::open_project_cb(Fl_Widget *, Main_Window *mw) {
+	// TODO
+	std::cout << "executing Main_Window::open_project_cb(Fl_Widget *, Main_Window *)" << std::endl;
+}
+
+void Main_Window::new_map_cb(Fl_Widget *, Main_Window *mw) {
 	if (mw->unsaved()) {
 		std::string msg = mw->modified_filename();
 		msg = msg + " has unsaved changes!\n\n"
