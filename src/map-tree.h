@@ -7,7 +7,7 @@
 
 #include "widgets.h"
 #include "main-window.h"
-#include "poke-project.h"
+#include "data/poke-project.h"
 
 // TODO: just declaring the class here *can't* be the right way of doing it, right?
 class Main_Window; 

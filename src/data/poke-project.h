@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-/*
+/**
  * Represents a pokered/pokecrystal project.
  */
 class Poke_Project {

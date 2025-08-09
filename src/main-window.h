@@ -28,7 +28,7 @@
 #include "palette-window.h"
 #include "directory-chooser.h"
 #include "map-tree.h"
-#include "poke-project.h"
+#include "data/poke-project.h"
 
 #define METATILES_PER_ROW 4
 

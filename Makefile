@@ -20,8 +20,8 @@ LDFLAGS = $(shell fltk-config --use-images --ldflags) $(shell pkg-config --libs 
 RELEASEFLAGS = -DNDEBUG -O3 -flto -march=native
 DEBUGFLAGS = -DDEBUG -D_DEBUG -O0 -g -ggdb3 -Wall -Wextra -pedantic -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter
 
-COMMON = $(wildcard $(srcdir)/*.h) $(wildcard $(resdir)/*.xpm)
-SOURCES = $(wildcard $(srcdir)/*.cpp)
+COMMON = $(wildcard $(srcdir)/*.h) $(wildcard $(srcdir)/data/*.h) $(wildcard $(resdir)/*.xpm)
+SOURCES = $(wildcard $(srcdir)/*.cpp) $(wildcard $(srcdir)/data/*.cpp)
 OBJECTS = $(SOURCES:$(srcdir)/%.cpp=$(tmpdir)/%.o)
 DEBUGOBJECTS = $(SOURCES:$(srcdir)/%.cpp=$(debugdir)/%.o)
 TARGET = $(bindir)/$(polishedmap)
