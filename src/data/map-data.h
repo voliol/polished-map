@@ -2,8 +2,6 @@
 #define MAP_DATA_H
 
 #include <string>
-
-#include "group.h"
 #include "blocks.h"
 #include "../tileset.h"
 #include "landmark.h"
@@ -11,6 +9,8 @@
 #include "encounter-group.h"
 #include "fishing-group.h"
 #include "headbutt-group.h"
+
+class Group;
 
 using Music = std::string;
 
@@ -31,10 +31,12 @@ public:
         PALETTE_AUTO, PALETTE_MORN, PALETTE_DAY, PALETTE_NITE, PALETTE_DARK
     };
 
+    Map_Data(std::string name) : _name(name) {};
+
 
 private:
 
-    std::string* _name;
+    std::string _name;
 
     Group* _group;
     Blocks* _blocks;
@@ -42,7 +44,7 @@ private:
 
     Environment _environment;
     Landmark* _landmark;
-    Music* _music;
+    Music _music;
     bool _hasPhoneService;
     ToD_Palette _tod_palette;
     Block_Tile _border_block;
