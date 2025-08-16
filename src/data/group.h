@@ -14,7 +14,9 @@ public:
     Group(std::string name) : _name(name) {} 
     // TODO: init the other members
 
+    std::string& name() {return _name;}
     void add_map(Map_Data* map);
+    const std::vector<Map_Data*>& maps() {return _maps;}
 
 private:
 

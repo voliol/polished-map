@@ -33,6 +33,7 @@ public:
 
     Map_Data(std::string name) : _name(name) {};
 
+    std::string& name() {return _name;}
 
 private:
 

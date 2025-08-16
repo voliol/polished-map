@@ -23,8 +23,9 @@ public:
 
     Poke_Project(const std::string &directory);
 
-    const std::string &directory() const { return _directory; }
+    const std::string& directory() const { return _directory; }
     const Game game() const { return _game; }
+    const std::vector<Group*>& groups() {return _groups;}
 
 private:
     const Game determine_game(const std::string &directory);

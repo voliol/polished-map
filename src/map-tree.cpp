@@ -31,39 +31,23 @@ bool Map_Tree::populate(Poke_Project *poke_project) {
 	_poke_project = poke_project;
 
 	clear();
-	
-	char map_constants[FL_PATH_MAX] = {};
-	Config::map_constants_path(map_constants, _poke_project->directory().c_str());
 
-
-	std::cout << "map_constants=" << map_constants << std::endl;
-
-	std::ifstream ifs;
-	open_ifstream(ifs, map_constants);
-
-	std::string groupname, mapname;
 	Fl_Tree_Item *item;
-	while (ifs.good()) {
-		std::string line;
-		std::getline(ifs, line);
-		std::istringstream lss(line);
+	for (Group* g : poke_project->groups()) {
 
-		std::string macro;
-		if (!leading_macro(lss, macro)) { continue; }
-
-		if (macro == "newgroup") {
-			lss >> groupname;
-			item = add(groupname.c_str());
+		if (poke_project->game() == Poke_Project::game_crystal) {
+			// no actual groups in pokered
+			item = add((g->name()).c_str());
 			usericon(&GROUP_ICON);
+		}
 
-		} else if (macro == "map_const"    // "map_const": pokecrystal
-					|| macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
-					|| macro == "mapconst" // "mapconst": pokered
-					) {
-			lss >> mapname;
-			mapname.pop_back(); // remove comma
-			std::cout << "adding map: " << (groupname + "/" + mapname) << std::endl;
-			item = add((groupname + "/" + mapname).c_str());
+		for (Map_Data* m : g->maps()) {
+			std::string mapname = m->name();
+			if (poke_project->game() == Poke_Project::game_crystal) {
+				mapname = g->name() + "/" + mapname;
+			}
+
+			item = add(mapname.c_str());
 			item->usericon(&MAP_ICON);
 		}
 	}
