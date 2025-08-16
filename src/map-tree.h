@@ -16,10 +16,12 @@ class Map_Tree : public OS_Tree {
 public:
 	Map_Tree(int x, int y, int w, int h, Main_Window *mainWindow);
 
+    bool hasGroups();
     bool populate(Poke_Project *poke_project);
     int handle(int e);
 
 private:
+
     void handleGroupItem(Fl_Tree_Item *item);
     void handleMapItem(Fl_Tree_Item *item);
 

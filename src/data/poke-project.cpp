@@ -38,9 +38,26 @@ const Poke_Project::Game Poke_Project::determine_game(const std::string &directo
 void Poke_Project::init_groups() {
     if (_game == game_red) {
 
-        Group* g = new Group {"FAKE_GROUP"};
+        Group* g = new Group {"VIRTUAL_GROUP"};
         _groups.push_back(g);
-        // TODO: get the map data
+
+        std::ifstream ifs {_directory + DIR_SEP + "constants" + DIR_SEP + "map_constants.asm"};
+
+        std::string line;
+        while (std::getline(ifs, line)) {
+		    std::istringstream lss(line);
+            std::string macro;
+            if (!leading_macro(lss, macro)) { continue; }
+
+            if (macro == "const") {
+                std::string mapname;
+                lss >> mapname;
+                Map_Data* m = new Map_Data {mapname};
+                g->add_map(m);
+
+                std::cout << "Adding map: " << mapname << std::endl;
+            }
+        }
 
     } else { // game_crystal
 
@@ -48,12 +65,11 @@ void Poke_Project::init_groups() {
 
         std::string line;
         Group* g;
-        while(std::getline(ifs, line)) {
+        while (std::getline(ifs, line)) {
 		    std::istringstream lss(line);
-
             std::string macro;
             if (!leading_macro(lss, macro)) { continue; }
-            
+
             if (macro == "newgroup") {
                 std::string groupname;
                 lss >> groupname;
@@ -62,7 +78,7 @@ void Poke_Project::init_groups() {
                 std::cout << "Adding group: " << groupname << std::endl;
             
             } else if (macro == "map_const"    // "map_const": pokecrystal
-					|| macro == "mapgroup" // "mapgroup": pokecrystal pre-2018
+					|| macro == "mapgroup"     // "mapgroup": pokecrystal pre-2018
 					) {
                 if (g) {
                     std::string mapname;

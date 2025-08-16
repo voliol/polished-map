@@ -16,6 +16,10 @@ Map_Tree::Map_Tree(int x, int y, int w, int h, Main_Window *mainWindow)
     // empty
 }
 
+bool Map_Tree::hasGroups() {
+	return _poke_project->game() == Poke_Project::game_crystal;
+}
+
 bool Map_Tree::populate(Poke_Project *poke_project) {
 
 	// We only allow populating once, since as things are, 
@@ -35,15 +39,14 @@ bool Map_Tree::populate(Poke_Project *poke_project) {
 	Fl_Tree_Item *item;
 	for (Group* g : poke_project->groups()) {
 
-		if (poke_project->game() == Poke_Project::game_crystal) {
-			// no actual groups in pokered
+		if (hasGroups()) {
 			item = add((g->name()).c_str());
 			usericon(&GROUP_ICON);
 		}
 
 		for (Map_Data* m : g->maps()) {
 			std::string mapname = m->name();
-			if (poke_project->game() == Poke_Project::game_crystal) {
+			if (hasGroups()) {
 				mapname = g->name() + "/" + mapname;
 			}
 
@@ -62,7 +65,7 @@ int Map_Tree::handle(int e) {
 			Fl_Tree_Item *item = (Fl_Tree_Item*)find_clicked();
 			if ( item ) {
 				select(item);
-				if ( item->depth() == 1 ) { 
+				if ( hasGroups() && item->depth() == 1 ) { 
 					handleGroupItem(item);
 				} else { 
 					handleMapItem(item);
