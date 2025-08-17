@@ -27,7 +27,6 @@ private:
 
     Main_Window *_mainWindow; // lazy way to get access to open_map() for now
     Poke_Project *_poke_project;
-    bool populated;
 };
 
 #endif

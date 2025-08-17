@@ -1278,17 +1278,21 @@ void Main_Window::swap_blocks(uint8_t f, uint8_t t) {
 void Main_Window::open_project(const char *dircstr) {
 	const std::string directory {dircstr};
 	if (_poke_project == NULL || directory != _poke_project->directory()) {
-		_poke_project = new Poke_Project(directory);
+		try {
+			_poke_project = new Poke_Project(directory);
 
-		// populate map list sidebar
-		if (!_map_list_tree->populate(_poke_project)) {
-			fl_alert("Could not populate map list tree");
-		}
+			_map_list_tree->populate(_poke_project);
 
-		std::cout << "opened " << *_poke_project << std::endl;
-		std::string msg {"Opened project at " + directory};
-		_success_dialog->message(msg);
-		_success_dialog->show(this);
+			std::cout << "opened " << *_poke_project << std::endl;
+			std::string msg {"Opened project at " + directory};
+			_success_dialog->message(msg);
+			_success_dialog->show(this);
+
+		} catch (std::runtime_error const& e) {
+			std::string msg {"Could not open project at " + directory + " (" + e.what() + ")"};
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+		} 
 	}
 }
 
@@ -2443,6 +2447,31 @@ void Main_Window::drag_and_drop_cb(DnD_Receiver *dndr, Main_Window *mw) {
 }
 
 void Main_Window::open_project_cb(Fl_Widget *, Main_Window *mw) {
+	
+	if (mw->unsaved()) {
+		std::string msg = mw->modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Open a new project anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+
+		if (mw->_unsaved_dialog->canceled()) { return; };
+	}
+
+	int status = mw->_new_dir_chooser->show();
+	if (status == 1) { return; }
+
+	const char *filename = mw->_new_dir_chooser->filename();
+	if (status == -1) {
+		std::string msg = "Could not open ";
+		msg = msg + filename + "!\n\n" + mw->_new_dir_chooser->errmsg();
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+		return;
+	}
+
+	mw->open_project(filename);
+
 	// TODO
 	std::cout << "executing Main_Window::open_project_cb(Fl_Widget *, Main_Window *)" << std::endl;
 }

@@ -22,15 +22,12 @@ bool Map_Tree::hasGroups() {
 
 bool Map_Tree::populate(Poke_Project *poke_project) {
 
-	// We only allow populating once, since as things are, 
-	// the program may try to populate (including clearing all items)
-	// while in the midst of handling a mapItem...
-	// Which causes a segfault.
-	// This is not ideal of course, since the user *could* be trying
-	// to open up a map from a new project, and then the tree *should*
-	// be repopulated.
-	// When projects are handled better, this can be changed.
-	if (populated) return true;
+	// This can cause a segfault, if the program may tries to 
+	// populate (including clearing all items) while in the midst 
+	// of handling a mapItem...
+	// Thus, better handling of maps is needed 
+	// (this class should probably not call Main_Window::open_map(char*))
+	// TODO
 
 	_poke_project = poke_project;
 
@@ -54,8 +51,7 @@ bool Map_Tree::populate(Poke_Project *poke_project) {
 			item->usericon(&MAP_ICON);
 		}
 	}
-
-	populated = true;
+	
 	return true;
 }
 

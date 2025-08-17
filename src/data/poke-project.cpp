@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <exception>
 
 #include "utils.h" // for DIR_SEP
 
@@ -24,11 +25,16 @@ const Poke_Project::Game Poke_Project::determine_game(const std::string &directo
     //   yes -> pokered
     //   no  -> pokecrystal
 
-    std::ifstream ifs {directory + DIR_SEP + "home.asm"};
+    std::string filename {directory + DIR_SEP + "home.asm"};
+    std::ifstream file {filename};
+
+    if ( !file ) {
+        throw std::runtime_error(filename + " not found.");
+    }
 
     int count = 0;
     std::string line;
-    while (std::getline(ifs, line)) {
+    while (std::getline(file, line)) {
         ++count;
     }
 
@@ -36,15 +42,20 @@ const Poke_Project::Game Poke_Project::determine_game(const std::string &directo
 }
 
 void Poke_Project::init_groups() {
+
+    std::string filename {_directory + DIR_SEP + "constants" + DIR_SEP + "map_constants.asm"};
+    std::ifstream file {filename};
+    if (!file) {
+        throw std::runtime_error(filename + " not found.");
+    }
+
     if (_game == game_red) {
 
         Group* g = new Group {"VIRTUAL_GROUP"};
         _groups.push_back(g);
 
-        std::ifstream ifs {_directory + DIR_SEP + "constants" + DIR_SEP + "map_constants.asm"};
-
         std::string line;
-        while (std::getline(ifs, line)) {
+        while (std::getline(file, line)) {
 		    std::istringstream lss(line);
             std::string macro;
             if (!leading_macro(lss, macro)) { continue; }
@@ -61,11 +72,9 @@ void Poke_Project::init_groups() {
 
     } else { // game_crystal
 
-        std::ifstream ifs {_directory + DIR_SEP + "constants" + DIR_SEP + "map_constants.asm"};
-
         std::string line;
         Group* g;
-        while (std::getline(ifs, line)) {
+        while (std::getline(file, line)) {
 		    std::istringstream lss(line);
             std::string macro;
             if (!leading_macro(lss, macro)) { continue; }
